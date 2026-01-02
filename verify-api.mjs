@@ -136,7 +136,54 @@ async function runTests() {
   // 12. Get User Stats
   await testEndpoint("Get User Stats", `/leaderboard/${userId}`);
 
-  // 13. Sign Out
+  // 13. Group Operations
+  // 13.1 Create Group
+  const createGroupRes = await testEndpoint("Create Group", "/group", "POST", {
+    name: "Test Group",
+    description: "A group for testing purposes",
+    creatorId: userId,
+  });
+
+  let groupId = "";
+  if (createGroupRes) {
+    groupId = createGroupRes.id;
+    console.log(`Group ID: ${groupId}`);
+  }
+
+  if (groupId) {
+    // 13.2 Get All Groups
+    await testEndpoint("Get All Groups", "/group");
+
+    // 13.3 Get User Groups
+    await testEndpoint("Get User Groups", `/group/user/${userId}`);
+
+    // 13.4 Get Group Members
+    await testEndpoint("Get Group Members", `/group/${groupId}/members`);
+
+    // 13.5 Get Group Leaderboard
+    await testEndpoint(
+      "Get Group Leaderboard",
+      `/group/${groupId}/leaderboard`
+    );
+
+    // 13.6 Get Group Tasks
+    await testEndpoint("Get Group Tasks", `/group/${groupId}/tasks`);
+
+    // 13.7 Join Group (Testing with same user, should handle gracefully)
+    await testEndpoint("Join Group", `/group/${groupId}/join`, "POST", {
+      userId,
+    });
+
+    // 13.8 Leave Group
+    await testEndpoint("Leave Group", `/group/${groupId}/leave`, "POST", {
+      userId,
+    });
+
+    // 13.9 Delete Group
+    await testEndpoint("Delete Group", `/group/${groupId}`, "DELETE");
+  }
+
+  // 14. Sign Out
   await testEndpoint("Sign Out", "/auth/sign-out", "POST", {});
 
   console.log("\n--- API Verification Complete ---");
